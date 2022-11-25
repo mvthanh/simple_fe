@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="config.js"></script>
+    <script src="pt.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <button id="connect" style="display: block">Connect metamask</button>
+    <div>
+        <p id="account" style="display: none"></p>
+    </div>
+</div>
+
+<div>
+    <form>
+        <label for="message">mess:</label>
+        <input type="text" id="mess" name="mess"><br><br>
+       
+    </form>
+    <button id="update">Update</button>
+    <p id="msg"></p>
+</div>
+
+
+<div>
+    <button id="view">View</button>
+    <p id="kq">
+ 
+</div>
+
+
+<script type="application/javascript">
+    if (typeof window.ethereum !== 'undefined') {
+        console.log('MetaMask is installed!');
+    }
+    
+
+    async function connectMetamask() {
+        if (typeof web3 !== 'undefined') {
+            window.web3 = new Web3(web3.currentProvider);
+        } else {
+            console.log('No web3? You should consider trying MetaMask!');
+            window.web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+        }
+        if (window.ethereum) {
+            await ethereum.enable();
+        }
+        let accountsOnEnable = await ethereum.request({method: 'eth_requestAccounts'});
+        console.log('accountsOnEnable', accountsOnEnable);
+        window.account = accountsOnEnable[0];
+
+        let x = document.getElementById("account");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+            let connect = document.getElementById("connect");
+            connect.style.display = "block";
+            x.innerText = "Account: " + accountsOnEnable[0]
+        } else {
+            x.style.display = "none";
+
+        }
+
+    }
+
+    document.getElementById("connect").addEventListener("click", connectMetamask);
+
+
+    async function set() {
+        let mess = document.getElementById("mess").value;
+        console.log(mess);
+        let contract = getContractInstance(Config.Abi, Config.Address);
+        let response = setMess(contract, mess, window.account).then(data => {
+                console.log(data);
+            });
+    }
+    
+    document.getElementById("update").addEventListener("click", set);
+
+    async function get() {
+        
+        let contract = getContractInstance(Config.Abi, Config.Address);
+        let response = getMess(contract).then(data => {
+            document.getElementById("kq").innerText = data;
+            console.log(data);
+        });
+    }
+
+    document.getElementById("view").addEventListener("click", get);
+
+    async function disconnect() {
+        if (typeof window.ethereum !== 'undefined') {
+            console.log('MetaMask is installed!');
+        }
+    }
+
+
+</script>
+</body>
+</html>
